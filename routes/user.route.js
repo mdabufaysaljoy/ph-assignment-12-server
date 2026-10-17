@@ -4,27 +4,28 @@ const verifyManager = require("../middlewares/verifyManager");
 const verifyToken = require("../middlewares/verifyToken");
 const User = require("../models/user.model");
 
+//? user create
 router.post("/register", createUser);
+
+//? user login
+router.post("/login",  async (req, res) => {
+  const email = req.body?.email;
+  console.log(email);
+  try {
+    if (email) {
+      const user = await User.findOne({ email });
+      res.send({ success: true, user });
+    }
+  } catch (error) {
+    res.status(401).send({ message: "forbidden access", success: false });
+  }
+});
+
+//? get users
 router.get("/", verifyToken, verifyManager, getUsers);
 
-// // Debug endpoint to check user data
-// // router.get("/debug/:email", async (req, res) => {
-//   try {
-//     const user = await User.findOne({ email: req.params.email });
-//     if (!user) {
-//       return res.status(404).send({ message: "User not found", user: null });
-//     }
-//     res.send({
-//       email: user.email,
-//       role: user.role,
-//       name: user.name,
-//       roleType: typeof user.role,
-//     });
-//   } catch (error) {
-//     res.status(500).send({ message: error.message });
-//   }
-// });
 
+//? for useUsers hook
 router.get("/:email", verifyToken, async (req, res) => {
   const email = req.params.email;
   try {

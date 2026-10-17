@@ -16,7 +16,7 @@ const createUser = async (req, res) => {
     if (checkUser.length) {
       res.status(203).json({
         success: true,
-        message: "Login Success",
+        message: "Signup Success",
       });
     } else {
       const user = await User.create({

@@ -13,6 +13,7 @@ app.use(cors());
 
 //? routers
 const userRouter = require("./routes/user.route");
+const assetRouter = require("./routes/asset.route");
 
 mongoose
   .connect(`${process.env.MONGODB_URI}/${process.env.DATABASE_NAME}`)
@@ -26,13 +27,18 @@ mongoose
 app.get("/", (req, res) => {
   res.send("server is running...");
 });
-app.post("/jwt", (req, res) => {
-  const token = jwt.sign(req.body, process.env.TOKEN_SECRET, {
-    expiresIn: "1h",
-  });
-  res.send({ token });
+app.post("/jwt", async (req, res) => {
+  try {
+    const token = await jwt.sign(req.body, process.env.TOKEN_SECRET, {
+      expiresIn: "1h",
+    });
+    res.send({ token });
+  } catch (error) {
+    res.status(501).send({ message: "jwt not created or send" });
+  }
 });
 app.use("/api/user", userRouter);
+app.use("/api/asset", assetRouter);
 
 const PORT = 3030;
 app.listen(PORT, () => {

@@ -27,6 +27,9 @@ const userSchema = new Schema(
     dateOfBirth: {
       type: String,
     },
+    subscription: {
+      type: String
+    }
   
   },
   {
