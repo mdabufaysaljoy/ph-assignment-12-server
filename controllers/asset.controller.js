@@ -14,18 +14,91 @@ const createAsset = async (req, res) => {
   }
 };
 
+
 const getAllAsset = async (req, res) => {
   try {
-    const assets = await Asset.find();
- return   res.status(200).send({
+    const {
+      availability,
+      assetType,
+      sortbyquantity,
+      search,
+    } = req.query;
+
+    // Build dynamic filter
+    const filter = {};
+
+    // 1. Filter by availability
+    if (availability === "instock") {
+      filter.quantity = { $gt: 0 };
+    } else if (availability === "outofstock") {
+      filter.quantity = { $lte: 0 };
+    } else if (availability) {
+      return res.status(400).send({
+        success: false,
+        message: "Invalid availability value",
+      });
+    }
+
+    // 2. Filter by asset type
+if (assetType) {
+  if (assetType === "returnable") {
+    filter.type = "Returnable";
+  } else if (assetType === "nonreturnable") {
+    filter.type = "Non-Returnable";
+  } else {
+    return res.status(400).send({
+      success: false,
+      message: "Invalid asset type",
+    });
+  }
+}
+
+    // 3. Search by asset name (case-insensitive)
+    if (search) {
+      const escapedSearch = search.replace(
+        /[.*+?^${}()|[\]\\]/g,
+        "\\$&"
+      );
+
+      filter.name = {
+        $regex: escapedSearch,
+        $options: "i",
+      };
+    }
+
+    // 4. Sort by quantity
+    const sort = {};
+
+    if (sortbyquantity === "asc") {
+      sort.quantity = 1;
+    } else if (sortbyquantity === "desc") {
+      sort.quantity = -1;
+    } else if (sortbyquantity) {
+      return res.status(400).send({
+        success: false,
+        message: "Invalid quantity sort value",
+      });
+    }
+
+    // Fetch assets using filters and sorting
+    const assets = await Asset.find(filter).sort(sort);
+
+    return res.status(200).send({
       success: true,
       data: assets,
-      message: "asset created successfully",
+      total: assets.length,
+      message: "Assets fetched successfully",
     });
   } catch (error) {
- return   res.status(501).send({ success: false, message: "asset find failed" });
+    console.error("Get assets error:", error);
+
+    return res.status(500).send({
+      success: false,
+      message: "Failed to fetch assets",
+    });
   }
 };
+
 
 const updateAsset = async (req, res) => {
     
