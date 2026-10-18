@@ -32,8 +32,8 @@ const updateAsset = async (req, res) => {
     const {productName,productType,quantity,date} = req.body;
   try {
     const _id = req.params._id;
-    const updatedAsset = await Asset.findByIdAndUpdate({ _id }, {name: productName,type:productType,quantity,date});
-   return res.status(203).send({
+    const updatedAsset = await Asset.findByIdAndUpdate( _id , {name: productName,type:productType,quantity,date});
+   return res.status(200).send({
       success: true,
       data: updatedAsset,
       message: "asset updated successfully",
